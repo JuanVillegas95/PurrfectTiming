@@ -1,36 +1,27 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# PurrfectTiming
+
+> **Note:** This project is currently under development.
+
+Welcome to PurrfectTiming, a unique scheduling application designed to bridge time zones and schedules, no matter where they are in the world. Born from a simple need to better synchronize weekly schedules between an individual in Mexico and their partner in the Slovenia, PurrfectTiming is here to help you find those perfect moments to connect across any distance.
+
+## Features
+
+- **Weekly Scheduling**: Easily create and manage your weekly schedule with a user-friendly interface.
+- **Compare Schedules**: Share schedules with other users and visually compare them to find overlapping free times.
+- **Cross-Timezone Support**: Seamlessly handles different time zones, ensuring you always know the right time to connect.
 
 ## Getting Started
 
-First, run the development server:
+To get started with TimeTails, follow these simple steps:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+1. **Create Your Schedule**: Add your weekly activities and mark your free times.
+2. **Connect with Friends or Loved Ones**: Share your schedule and ask them to share theirs.
+3. **Find the Best Times to Connect**: Use our comparison feature to easily see when both of you are free.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Why PurrfectTiming?
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+In today's busy world, finding time to connect with those we care about can be challenging, especially when dealing with different time zones. PurrfectTiming makes it easier by visually comparing your schedules to find the best times to chat, share a meal virtually, or simply catch up. Plus, the adorable monkey and cat themes are sure to make planning something you look forward to!
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+## Acknowledgments
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- Images: All monkey and cat images used in the app are either created by us or sourced from [source name], used under [license name].
