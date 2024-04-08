@@ -24,4 +24,4 @@ In today's busy world, finding time to connect with those we care about can be c
 
 ## Acknowledgments
 
-- Images: All monkey and cat images used in the app are either created by us or sourced from [source name], used under [license name].
+- Images: All monkey and cat images used in the app are created by [@frosted_violet](https://www.instagram.com/frosted_violet/)
