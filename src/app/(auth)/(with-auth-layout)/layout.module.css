@@ -1,0 +1,57 @@
+.container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.card {
+  width: 400px;
+  height: 300px;
+  border-radius: 15px;
+  border: 13px solid #bb7961;
+  margin: auto;
+  background-color: #E8B788;
+  padding: 10px;
+}
+
+.monke_login {
+  position: absolute;
+  width: 250px;
+  height: auto;
+  top: 250px;
+  left: 700px;;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.input {
+  width: 80%;
+  margin-bottom: 20px;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.button {
+  width: 80%;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  background-color: #bb7961;
+  color: white;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.button:hover {
+  background-color: #a36854;
+}

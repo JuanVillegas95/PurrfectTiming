@@ -1,0 +1,163 @@
+.profile_card {
+  display: flex;
+  flex-direction: column;
+  width: 600px;
+  height: 300px;
+  border-radius: 15px;
+  border: 13px solid #bb7961;
+  margin: auto;
+  background-color: #E8B788;
+}
+
+.wallpaper_picture {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+}
+
+.header{
+  position: relative;
+  width: 100%;
+  height: 33%;
+}
+.profile_picture {
+  position: absolute;
+  top: 30px;
+  left: 5px;
+  border: 8px solid #bb7961;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+}
+
+.profile_picture img {
+  border-radius: 50%;
+}
+
+.header img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.wallpaper_picture img{
+  border-radius: 15px;
+}
+
+.main .information {
+  padding: 40px;
+}
+
+.main{
+  display: flex;
+  flex-direction: row;
+  flex-grow: 1;
+}
+
+.information ul{
+  list-style-type: none;
+}
+
+.information{
+  width: 40%;
+  height: auto;
+  border-right: 2px black solid;
+}
+
+.comment{
+  width: 60%; 
+  height: auto;
+}
+
+.error_card {
+  width: 600px;
+  height: 300px;
+  border-radius: 15px;
+  border: 13px solid #bb7961;
+  margin: auto;
+  background-color: #E8B788;
+  padding: 30px;
+}
+
+
+/* NEW */
+
+/* .profile_card {
+  display: flex;
+  flex-direction: column;
+  width: 80%;
+  max-width: 600px;
+  margin: 2rem auto;
+  background-color: #f9f9f9;
+  border: 2px solid #dcdcdc;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.header {
+  width: 100%;
+  height: 200px;
+  position: relative;
+}
+
+.profile_picture {
+  position: absolute;
+  top: -50px;
+  left: 20px;
+  border: 4px solid #ffffff;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.main {
+  display: flex;
+  flex-direction: row;
+  flex-grow: 1;
+}
+
+.information,
+.comment {
+  flex-basis: 50%;
+  padding: 20px;
+}
+
+.information ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.information li + li {
+  margin-top: 10px;
+}
+
+.comment input[type="text"] {
+  width: calc(100% - 20px);
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #dcdcdc;
+  border-radius: 5px;
+}
+
+.comment p {
+  background-color: #efefef;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+}
+
+.error_card {
+}
+
+@media (max-width: 768px) {
+  .main {
+    flex-direction: column;
+  }
+
+  .information,
+  .comment {
+    flex-basis: auto;
+  }
+} */
