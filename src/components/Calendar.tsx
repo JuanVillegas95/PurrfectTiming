@@ -1,137 +1,145 @@
 "use client";
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from "react";
+import Image from "next/image";
+import settingsIcon from "@/images/settings-icon.png";
+import editIcon from "@/images/editIcon.png";
 
-const daysOfWeek = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
-const buttonNames = [
-  "Print",
-  "Create",
-  "Compare",
-  "Help",
-  "Save",
-  "Share",
-  "Edit",
-  "Delete",
-  "Remove",
-];
+const daysOfWeek = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
+const buttonNames = ["Print", "Create", "Compare", "Help", "Save", "Share", "Edit", "Delete", "Remove"];
 
-function generateHours(timeStart: string) {
-  const hoursArray = [];
+const generateHours = (timeStart: string): string[] => {
+  const hoursArray: string[] = [];
   let hour = parseInt(timeStart.substring(0, 2), 10);
   let minutes = parseInt(timeStart.substring(3, 5), 10);
 
   for (let i = 0; i < 24; i++) {
     let hourFormatted = hour < 10 ? `0${hour}` : `${hour}`;
     let minutesFormatted = minutes < 10 ? `0${minutes}` : `${minutes}`;
-
     hoursArray.push(`${hourFormatted}:${minutesFormatted}`);
-
     hour = (hour + 1) % 24;
   }
 
   return hoursArray;
-}
+};
+
+const generateTimeCells = (timeStart: string): string[] => {
+  const TimeCellsArray: string[] = [];
+  let hour = parseInt(timeStart.substring(0, 2), 10);
+  let minutes = parseInt(timeStart.substring(3, 5), 10);
+
+  for (let i = 0; i < 48; i++) { 
+    TimeCellsArray.push(`${hour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`);
+
+    minutes += 30;
+    if (minutes >= 60) {
+      minutes = 0; 
+      hour = (hour + 1) % 24; 
+    }
+  }
+
+  return TimeCellsArray;
+};
 
 
-function LayoutContainer({ children }) {
-  return (
-    <div className="w-8/12 h-3/4 bg-white grid grid-cols-12 grid-rows-10 rounded-lg border-amber-900 border-8">
-      {children}
-    </div>
-  );
-}
+const LayoutContainer = ({ children }: { children: React.ReactNode }) => (
+  <div className="w-8/12 h-3/4 bg-white grid grid-cols-12 grid-rows-10 rounded-xl">
+    {children}
+  </div>
+);
 
-function Header() {
-  return (
-    <div className="col-span-12 border-b font-mona text-xl p-4">
+const Header = ({isModalOpen, setIsModalOpen}: {isModalOpen: boolean, setIsModalOpen: (bool : boolean) => void}) => (
+  <div className="col-span-12 border-b font-mona text-xl p-6">
+    <div className="flex flex-row items-center">
       <h1>Name of the schedule</h1>
+      <div className="flex-grow"></div>
+      <Image className="transition-transform duration-200 hover:scale-110 cursor-pointer inline-block" src={editIcon.src} alt="Edit" width={25} height={25} />
+      <Image className="transition-transform duration-200 hover:scale-110 cursor-pointer inline-block ml-2 " src={settingsIcon.src} alt="Settings" width={25} height={25} />
     </div>
-  );
-}
+  </div>
+);
 
-function Empty() {
-  return (
-    <div className="col-span-1"></div>
-  );
-}
+const Empty = () => <div className="col-span-1"></div>;
 
-function DaysRow({ days }) {
-  return (
-    <div className="col-span-11 row-span-1">
+const DaysRow = ({ days }: { days: string[] }) => (
+  <div className="col-span-11 row-span-1">
+    <div className="grid grid-cols-7">
+      {days.map((day: string, index: number) => (
+        <div key={index} className="flex items-center justify-center min-h-[50px] font-mona text-sm mt-4">
+          {day}
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+const TimeAndCells = ({ hours, timeCells}: { hours: string[], timeCells: string[] }) => (
+  <div className="col-span-12 row-span-9 overflow-y-auto grid grid-cols-12">
+    <div className="col-span-1 m-5">
+      {hours.map((hour, index) => (
+        <div key={index} className={`flex items-center justify-center font-mona text-sm ${index === 0 ? "-mt-6 mb-[46px]" : "mb-12"}`}>
+          {hour}
+        </div>
+      ))}
+    </div>
+    <div className="col-span-11">
       <div className="grid grid-cols-7">
-        {days.map((day: string, index: number) => (
-          <div key={index} className="flex items-center justify-center min-h-[50px] font-mona text-sm mt-4">
-            {day}
-          </div>
-        ))}
+        {Array.from({ length: 7 }, (_, index) => <div key={index} className="pb-1"></div>)}
+        {Array.from({ length: 336 }, (_, index) => {
+          const dayIndex = index % 7; 
+          const timeIndex = Math.floor(index / 7);
+          const dayName = daysOfWeek[dayIndex].toUpperCase(); 
+          const timeSlot = timeCells[timeIndex]; 
+          return (
+            <div 
+              key={index} 
+              className="border border-dashed border-gray-300 p-4"
+              data-value={`${dayName} ${timeSlot}`} // Combine day name and time slot
+            ></div>
+          );
+        })}
       </div>
     </div>
-  );
-}
+  </div>
+);
 
 
-function TimeAndCells({ timeStart }) {
+const SideBarContainer = () => (
+  <div className="w-1/12 h-3/4 ml-5 flex flex-col">
+    {buttonNames.map((text, index) => <SideBarIcon key={index} text={text} />)}
+  </div>
+);
+
+const SideBarIcon = ({ text }: { text: string }) => (
+  <div className="bg-white flex justify-center items-center relative h-16 w-full mt-2 mb-2 mx-auto rounded-xl">
+    {text}
+  </div>
+);
+
+const Calendar = () => {
+  const [timeStart, setTimeStart] = useState<string>("07:00");
   const [hours, setHours] = useState<string[]>([]);
+  const [timeCells, setTimeCells] = useState<string[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
 
   useEffect(() => {
     setHours(generateHours(timeStart));
+    setTimeCells(generateTimeCells(timeStart));
   }, [timeStart]);
 
-  return (
-    <div className='col-span-12 row-span-9 overflow-y-auto grid grid-cols-12'>
-      <div className='col-span-1 m-5'>
-        {
-          hours.map((hour, index) => (
-            <div key={index} className={`flex items-center justify-center font-mona text-sm mb-12 ${index === 0 ? '-mt-6' : ''}`}
-            >
-              {hour}
-            </div>
-          ))
-        }
-      </div>
-      <div className='col-span-11'>
-        <div className="grid grid-cols-7">
-          {Array.from({ length: 7 }, (_, index) => (
-            <div 
-              key={index}
-              className="pb-1"
-            >
-            </div>
-          ))}
-          {Array.from({ length: 329 }, (_, index) => (
-            <div
-              key={index}
-              className="border border-dashed border-gray-300 p-4 "
-            >
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-function SideBarContainer() {
-  return (
-    <div className="w-1/12 h-3/4 bg-white ml-5">
-      {/* <Buttons buttonNames={buttonNames} /> */}
-    </div>
-  );
-}
-
-
-
-export default function Calendar() {
-  const timeStart = "00:00";
   return (
     <>
       <div className="flex items-center justify-center h-screen">
         <LayoutContainer>
-          <Header />
+          <Header isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen}/>
           <Empty />
           <DaysRow days={daysOfWeek} />
-          <TimeAndCells timeStart={timeStart} />
+          <TimeAndCells hours={hours} timeCells={timeCells} />
         </LayoutContainer>
         <SideBarContainer />
       </div>
     </>
   );
-}
+};
+
+export default Calendar;
