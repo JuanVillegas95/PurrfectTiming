@@ -27,18 +27,30 @@ const generateTimeCells = (timeStart: string): string[] => {
   let hour = parseInt(timeStart.substring(0, 2), 10);
   let minutes = parseInt(timeStart.substring(3, 5), 10);
 
-  for (let i = 0; i < 48; i++) { 
+  for (let i = 0; i < 48; i++) {
     TimeCellsArray.push(`${hour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`);
 
     minutes += 30;
     if (minutes >= 60) {
-      minutes = 0; 
-      hour = (hour + 1) % 24; 
+      minutes = 0;
+      hour = (hour + 1) % 24;
     }
   }
 
   return TimeCellsArray;
 };
+
+const TimeCard = ({ props }: { props: Object | null }) => {
+  if (!props) return <div className="w-8 h-8 bg-green-500 absolute"></div>;
+  const {top, left, width, height} = props
+  return (
+    <div
+      style={{ width, height, top, left, backgroundColor: 'black',   position: 'absolute' }}
+    ></div>
+  );
+};
+
+
 
 
 const LayoutContainer = ({ children }: { children: React.ReactNode }) => (
@@ -47,13 +59,13 @@ const LayoutContainer = ({ children }: { children: React.ReactNode }) => (
   </div>
 );
 
-const Header = ({isModalOpen, setIsModalOpen}: {isModalOpen: boolean, setIsModalOpen: (bool : boolean) => void}) => (
+const Header = ({ isModalOpen, setIsModalOpen }: { isModalOpen: boolean, setIsModalOpen: (bool: boolean) => void }) => (
   <div className="col-span-12 border-b font-mona text-xl p-6">
     <div className="flex flex-row items-center">
       <h1>Name of the schedule</h1>
       <div className="flex-grow"></div>
       <Image className="transition-transform duration-200 hover:scale-110 cursor-pointer inline-block" src={editIcon.src} alt="Edit" width={25} height={25} />
-      <Image className="transition-transform duration-200 hover:scale-110 cursor-pointer inline-block ml-2 " src={settingsIcon.src} alt="Settings" width={25} height={25} />
+      <Image className="transition-transform duration-200 hover:scale-110 cursor-pointer inline-block ml-3 " src={settingsIcon.src} alt="Settings" width={25} height={25} />
     </div>
   </div>
 );
@@ -72,7 +84,7 @@ const DaysRow = ({ days }: { days: string[] }) => (
   </div>
 );
 
-const TimeAndCells = ({ hours, timeCells}: { hours: string[], timeCells: string[] }) => (
+const TimeAndCells = ({ hours, timeCells, handleEventCard, timeCardProps }: { hours: string[], timeCells: string[], handleEventCard: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void, timeCardProps:  Object | null}) => (
   <div className="col-span-12 row-span-9 overflow-y-auto grid grid-cols-12">
     <div className="col-span-1 m-5">
       {hours.map((hour, index) => (
@@ -82,21 +94,26 @@ const TimeAndCells = ({ hours, timeCells}: { hours: string[], timeCells: string[
       ))}
     </div>
     <div className="col-span-11">
-      <div className="grid grid-cols-7">
+      <div className="grid grid-cols-7 relative" id="cells-container">
         {Array.from({ length: 7 }, (_, index) => <div key={index} className="pb-1"></div>)}
         {Array.from({ length: 336 }, (_, index) => {
-          const dayIndex = index % 7; 
+          const dayIndex = index % 7;
           const timeIndex = Math.floor(index / 7);
-          const dayName = daysOfWeek[dayIndex].toUpperCase(); 
-          const timeSlot = timeCells[timeIndex]; 
+          const dayName = daysOfWeek[dayIndex];
+          const timeSlot = timeCells[timeIndex];
+          const cellId = `${index}_${dayName}_${timeSlot}`;
+
           return (
-            <div 
-              key={index} 
-              className="border border-dashed border-gray-300 p-4"
-              data-value={`${dayName} ${timeSlot}`} // Combine day name and time slot
-            ></div>
+              <div
+                key={index}
+                id={cellId}
+                className="border border-dashed border-gray-300 p-4"
+                data-value={`${dayName} ${timeSlot}`}
+                onClick={(e) => handleEventCard(e)}
+              ></div>
           );
         })}
+        <TimeCard props={timeCardProps} />
       </div>
     </div>
   </div>
@@ -120,21 +137,34 @@ const Calendar = () => {
   const [hours, setHours] = useState<string[]>([]);
   const [timeCells, setTimeCells] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-
+  const [timeCardProps, setTimeCardProps] = useState<Object | null>(null);
 
   useEffect(() => {
     setHours(generateHours(timeStart));
     setTimeCells(generateTimeCells(timeStart));
   }, [timeStart]);
 
+  const handleEventCard = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    const cellsContainer = document.getElementById("cells-container") as HTMLDivElement;
+    const cell = document.getElementById(e.currentTarget.id) as HTMLDivElement;
+    const cellsContainerProps = cellsContainer.getBoundingClientRect();
+    const cellProps = cell.getBoundingClientRect();
+  
+    const top = cellProps.top - cellsContainerProps.top;
+    const left = cellProps.left - cellsContainerProps.left;
+    const width = cellProps.width;
+    const height = cellProps.height;
+    
+    setTimeCardProps({ top:top, left:left, width:width, height:height });
+  }
   return (
     <>
       <div className="flex items-center justify-center h-screen">
         <LayoutContainer>
-          <Header isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen}/>
+          <Header isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} />
           <Empty />
           <DaysRow days={daysOfWeek} />
-          <TimeAndCells hours={hours} timeCells={timeCells} />
+          <TimeAndCells hours={hours} timeCells={timeCells} handleEventCard={handleEventCard} timeCardProps={timeCardProps} />
         </LayoutContainer>
         <SideBarContainer />
       </div>
