@@ -3,6 +3,9 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import settingsIcon from "@/images/settings-icon.png";
 import editIcon from "@/images/editIcon.png";
+import dragDropIcon from "@/images/drag-and-drop.png"
+import bellIcon from "@/images/bell.png"
+import whiteArrowIcon from "@/images/whiteArrow.png"
 
 const daysOfWeek = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
 const buttonNames = ["Print", "Create", "Compare", "Help", "Save", "Share", "Edit", "Delete", "Remove"];
@@ -41,26 +44,58 @@ const generateTimeCells = (timeStart: string): string[] => {
 };
 
 const TimeCard = ({ props }: { props: Object | null }) => {
-  if (!props) return <div className="w-8 h-8 bg-green-500 absolute"></div>;
-  const {top, left, width, height} = props
+  if (!props) return (
+    <div className="absolute z-50 top-0 left-0 w-40 h-auto border-purple-primary border-2 rounded-lg">
+      <header className="bg-purple-primary rounded-t-md flex flex-row items-center p-2 text-white font-mona text-[10px] tracking-widest">
+        <Image className=" mr-2" src={bellIcon.src} width={20} height={20} alt="drag-and-drop" />
+        <span>7:00</span>
+        <Image className="mx-2" src={whiteArrowIcon.src} width={20} height={30} alt="white-arrow" />
+        <span>10:00</span>
+      </header>
+      <main className=" rounded-b-md w-full h-auto p-2">
+        <div className="absolute inset-0 bg-purple-primary opacity-10"></div>
+        <span className="font-mona text-xs text-black ">Math Class</span>
+        <Image className="origing-center rotate-90 absolute right-1 bottom-1 opacity-25 cursor-grab" src={dragDropIcon.src} width={10} height={10} alt="drag-and-drop" />
+      </main>
+    </div>
+
+  );
+
+  const { top, left, width, height } = props
   return (
-    <div
-      style={{ width, height, top, left, backgroundColor: 'black',   position: 'absolute' }}
-    ></div>
+    <div className="absolute z-50 top-0 left-0 h-auto border-purple-primary border-2 rounded-lg"
+      style={{
+        width: `${width}vw`,
+        top: `${top}vh`, 
+        left: `${left}vw`,
+        position: 'absolute',
+        zIndex: 50
+      }}>
+
+      <header className="bg-purple-primary rounded-t-md flex flex-row items-center p-2 text-white font-mona text-[10px] tracking-widest">
+        <Image className=" mr-2" src={bellIcon.src} width={20} height={20} alt="drag-and-drop" />
+        <span>7:00</span>
+        <Image className="mx-2" src={whiteArrowIcon.src} width={20} height={30} alt="white-arrow" />
+        <span>10:00</span>
+      </header>
+      <main className=" rounded-b-md w-full h-auto p-2">
+        <div className="absolute inset-0 bg-purple-primary opacity-10"></div>
+        <span className="font-mona text-xs text-black ">Math Class</span>
+        <Image className="origing-center rotate-90 absolute right-1 bottom-1 opacity-25 cursor-grab" src={dragDropIcon.src} width={10} height={10} alt="drag-and-drop" />
+      </main>
+    </div>
   );
 };
 
 
-
-
 const LayoutContainer = ({ children }: { children: React.ReactNode }) => (
-  <div className="w-8/12 h-3/4 bg-white grid grid-cols-12 grid-rows-10 rounded-xl">
+  <div className="w-10/12 h-5/6 bg-white grid grid-cols-12 grid-rows-10 rounded-xl relative z-0 overflow-visible">
     {children}
   </div>
 );
 
 const Header = ({ isModalOpen, setIsModalOpen }: { isModalOpen: boolean, setIsModalOpen: (bool: boolean) => void }) => (
-  <div className="col-span-12 border-b font-mona text-xl p-6">
+  <div className="col-span-12 border-b font-mona text-xl p-6 relative z-0 overflow-visible">
     <div className="flex flex-row items-center">
       <h1>Name of the schedule</h1>
       <div className="flex-grow"></div>
@@ -70,10 +105,10 @@ const Header = ({ isModalOpen, setIsModalOpen }: { isModalOpen: boolean, setIsMo
   </div>
 );
 
-const Empty = () => <div className="col-span-1"></div>;
+const Empty = () => <div className="col-span-1 relative z-0 overflow-visible"></div>;
 
 const DaysRow = ({ days }: { days: string[] }) => (
-  <div className="col-span-11 row-span-1">
+  <div className="col-span-11 row-span-1 relative z-0 overflow-visible">
     <div className="grid grid-cols-7">
       {days.map((day: string, index: number) => (
         <div key={index} className="flex items-center justify-center min-h-[50px] font-mona text-sm mt-4">
@@ -84,8 +119,8 @@ const DaysRow = ({ days }: { days: string[] }) => (
   </div>
 );
 
-const TimeAndCells = ({ hours, timeCells, handleEventCard, timeCardProps }: { hours: string[], timeCells: string[], handleEventCard: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void, timeCardProps:  Object | null}) => (
-  <div className="col-span-12 row-span-9 overflow-y-auto grid grid-cols-12">
+const TimeAndCells = ({ hours, timeCells, handleEventCard, timeCardProps }: { hours: string[], timeCells: string[], handleEventCard: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void, timeCardProps: Object | null }) => (
+  <div className="col-span-12 row-span-9 overflow-y-auto grid grid-cols-12 relative z-0 overflow-visible">
     <div className="col-span-1 m-5">
       {hours.map((hour, index) => (
         <div key={index} className={`flex items-center justify-center font-mona text-sm ${index === 0 ? "-mt-6 mb-[46px]" : "mb-12"}`}>
@@ -93,8 +128,9 @@ const TimeAndCells = ({ hours, timeCells, handleEventCard, timeCardProps }: { ho
         </div>
       ))}
     </div>
-    <div className="col-span-11">
-      <div className="grid grid-cols-7 relative" id="cells-container">
+    <div className="col-span-11 relative z-0 overflow-visible">
+      <div className="grid grid-cols-7 relative z-0 overflow-visible" id="cells-container">
+        <TimeCard props={timeCardProps} />
         {Array.from({ length: 7 }, (_, index) => <div key={index} className="pb-1"></div>)}
         {Array.from({ length: 336 }, (_, index) => {
           const dayIndex = index % 7;
@@ -104,16 +140,16 @@ const TimeAndCells = ({ hours, timeCells, handleEventCard, timeCardProps }: { ho
           const cellId = `${index}_${dayName}_${timeSlot}`;
 
           return (
-              <div
-                key={index}
-                id={cellId}
-                className="border border-dashed border-gray-300 p-4"
-                data-value={`${dayName} ${timeSlot}`}
-                onClick={(e) => handleEventCard(e)}
-              ></div>
+            <div
+              key={index}
+              id={cellId}
+              className="border border-dashed border-gray-300 w-full h-8"
+              data-value={`${dayName} ${timeSlot}`}
+              onClick={(e) => handleEventCard(e)}
+            >
+            </div>
           );
         })}
-        <TimeCard props={timeCardProps} />
       </div>
     </div>
   </div>
@@ -144,19 +180,31 @@ const Calendar = () => {
     setTimeCells(generateTimeCells(timeStart));
   }, [timeStart]);
 
-  const handleEventCard = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+  const handleEventCard = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, mouseDownPosition: { x: number, y: number }) => {
     const cellsContainer = document.getElementById("cells-container") as HTMLDivElement;
+    if (!cellsContainer) return; // Always good to check for null
+
     const cell = document.getElementById(e.currentTarget.id) as HTMLDivElement;
+    if (!cell) return; // Check cell as well
+
     const cellsContainerProps = cellsContainer.getBoundingClientRect();
     const cellProps = cell.getBoundingClientRect();
-  
-    const top = cellProps.top - cellsContainerProps.top;
-    const left = cellProps.left - cellsContainerProps.left;
-    const width = cellProps.width;
-    const height = cellProps.height;
-    
-    setTimeCardProps({ top:top, left:left, width:width, height:height });
-  }
+
+    const topVh = ((cellProps.top - cellsContainerProps.top) / window.innerHeight) * 100;
+    const leftVw = ((cellProps.left - cellsContainerProps.left) / window.innerWidth) * 100;
+    const widthVw = (cellProps.width / window.innerWidth) * 100;
+    const heightVh = (cellProps.height / window.innerHeight) * 100;
+
+    setTimeCardProps({
+      top: topVh,
+      left: leftVw,
+      width: widthVw,
+      height: heightVh
+    });
+  };
+
+
+
   return (
     <>
       <div className="flex items-center justify-center h-screen">
@@ -173,3 +221,11 @@ const Calendar = () => {
 };
 
 export default Calendar;
+
+
+
+
+
+
+
+

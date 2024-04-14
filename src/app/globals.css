@@ -2,6 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --primary-purple: #571BFB;
+  --secondary-purple: #ECEBFF;
+  --tertiary-purple: #B198FF;
+
+  --primary-blue: #01A2EA;
+  --secondary-blue: #F1FAFD;
+  --tertiary-blue: #DAF5FC;
+
+  --primary-pink: #FE3CBB;
+  --secondary-pink: #FDECF9;
+  --tertiary-pink: #FCD8EF;
+
+  --primary-orange: #FF7E00;
+  --secondary-orange: #FEF3F0;
+  --tertiary-orange: #FFE9DC;
+}
+
 @font-face {
   font-family: 'Mona Sans';
   src: url('/fonts/Mona-Sans.ttf');
@@ -9,7 +27,6 @@
   font-style: bold;
 }
 
-:root {}
 
 * {
   margin: 0;
@@ -20,3 +37,5 @@
 body {
   background-color: #F3E9E9;
 }
+
+
