@@ -1,6 +1,8 @@
-export interface timeCardProps {
+export interface timeCardProps{
   top: number,
   left: number,
   width: number,
-  height?: number
+  height?: number,
+  timeStart: string,
+  timeEnd?: string,
 }
