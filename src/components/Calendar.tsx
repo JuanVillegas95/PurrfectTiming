@@ -1,8 +1,8 @@
 "use client"; // Assuming this is an experimental directive or should be removed if it's incorrect.
 import React, { useState, useEffect } from 'react';
-import { timeCardProps } from "@/types/calendar";
+import { TimeCard } from "@/types/calendar";
+import { weeklyCalendar } from '@/types/calendar';
 
-import Image from "next/image";
 import settingsIcon from "@/images/settings-icon.png";
 import editIcon from "@/images/editIcon.png";
 import dragDropIcon from "@/images/drag-and-drop.png";
@@ -44,6 +44,23 @@ const generateTimeCells = (timeStart: string): string[] => {
   return timeCellsArray;
 };
 
+const calculateExactTime = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, cellTime: string) => {
+  const cellHeight = (e.target as HTMLElement).offsetHeight;
+  const relativeY = e.clientY - (e.target as HTMLElement).getBoundingClientRect().top;
+
+  const minutesPerPixel = 30 / cellHeight;
+  const minutesFromStart = Math.floor(relativeY * minutesPerPixel);
+
+  let [hours, minutes] = cellTime.split(':').map(Number);
+  minutes += minutesFromStart;
+  if (minutes >= 60) {
+    minutes -= 60;
+    hours = (hours + 1) % 24;
+  }
+
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+};
+
 const LayoutContainer = ({ children }: { children: React.ReactNode }) => (
   <div className="flex items-center justify-center h-screen">
     <div className="w-10/12 h-5/6 bg-white grid grid-cols-12 grid-rows-10 rounded-xl">
@@ -52,15 +69,14 @@ const LayoutContainer = ({ children }: { children: React.ReactNode }) => (
   </div>
 );
 
-const Header = () => {
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+const Header = ({name}: {name:string}) => {
   return (
     <div className="col-span-12 border-b font-mona text-xl p-6 ">
       <div className="flex flex-row items-center">
-        <h1>Name of the schedule</h1>
+        <h1>{name}</h1>
         <div className="flex-grow"></div>
-        <Image className="transition-transform duration-200 hover:scale-110 cursor-pointer inline-block" src={editIcon.src} alt="Edit" width={25} height={25} />
-        <Image className="transition-transform duration-200 hover:scale-110 cursor-pointer inline-block ml-3" src={settingsIcon.src} alt="Settings" width={25} height={25} />
+        <img className="transition-transform duration-200 hover:scale-110 cursor-pointer inline-block" src={editIcon.src} alt="Edit" width={25} height={25} />
+        <img className="transition-transform duration-200 hover:scale-110 cursor-pointer inline-block ml-3" src={settingsIcon.src} alt="Settings" width={25} height={25} />
       </div>
     </div>
   );
@@ -80,91 +96,58 @@ const DaysRow = () => (
   </div>
 );
 
+const TimeAndCells = ({calendar, setCalendar} : {calendar: weeklyCalendar, setCalendar: React.Dispatch<React.SetStateAction<weeklyCalendar>>}) => {
 
-
-const TimeAndCells = () => {
-  const [timeStart, setTimeStart] = useState<string>("08:00");
-  const hours = generateHours(timeStart);
-  const timeCells = generateTimeCells(timeStart);
-  const [timeCardProps, setTimeCardProps] = useState<timeCardProps | null>(null);
-  const [isMouseDown, setIsMouseDown] = useState<boolean>(false);
-  const [initialMousePositionY, setInitialMousePositionY] = useState(0);
-
-  const calculateExactTime = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, cellTime: string) => {
-    const cellHeight = (e.target as HTMLElement).offsetHeight;
-    const relativeY = e.clientY - (e.target as HTMLElement).getBoundingClientRect().top;
-
-    const minutesPerPixel = 30 / cellHeight;
-    const minutesFromStart = Math.floor(relativeY * minutesPerPixel);
-
-    let [hours, minutes] = cellTime.split(':').map(Number);
-    minutes += minutesFromStart;
-    if (minutes >= 60) {
-      minutes -= 60;
-      hours = (hours + 1) % 24;
-    }
-
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-  };
-
+  const [timeCards, setTimeCards] = useState<TimeCard[]>([]);
+  const [mouse, setMouse] = useState({ isDown: false, initialPositionY: 0 });
+  const hours = generateHours(calendar.timeStart);
+  const timeCells = generateTimeCells(calendar.timeStart);
 
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, cellTime: string) => {
+    setMouse({ isDown: true, initialPositionY: e.clientY });
+
     const cellProps = e.currentTarget.getBoundingClientRect();
     const cellsContainerProps = (document.getElementById("cells-container") as HTMLDivElement).getBoundingClientRect();
-      setInitialMousePositionY(e.clientY);
-      setIsMouseDown(true);
-      setTimeCardProps({
-        top: ((e.clientY - cellsContainerProps.top) / window.innerHeight) * 100,
-        left: ((cellProps.left - cellsContainerProps.left) / window.innerWidth) * 100,
-        width: (cellProps.width / window.innerWidth) * 100,
-        timeStart: calculateExactTime(e, cellTime),
-      });
+    const newTimeCard: TimeCard = {
+      name: "",
+      top: ((e.clientY - cellsContainerProps.top) / window.innerHeight) * 100,
+      left: ((cellProps.left - cellsContainerProps.left) / window.innerWidth) * 100,
+      width: (cellProps.width / window.innerWidth) * 100,
+      height: 0,
+      timeStart: calculateExactTime(e, cellTime),
+      timeEnd: "",
+    }
+    setTimeCards([...timeCards, newTimeCard]);
   }
 
   const handleMouseUp = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, cellTime: string) => {
-      setIsMouseDown(false);
-      setInitialMousePositionY(0);
-      setTimeCardProps((prev: any) => ({
-        ...prev,
-        timeEnd: calculateExactTime(e, cellTime),
-      }));
+    setMouse({ isDown: false, initialPositionY: 0 });
+
+    setTimeCards(timeCards.map((card, idx) => {
+      if (idx === timeCards.length - 1) {
+        return {
+          ...card,
+          timeEnd: calculateExactTime(e, cellTime)
+        };
+      }
+      return card;
+    }));
   }
 
   const handleOnMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    if (isMouseDown && timeCardProps) {
-      setTimeCardProps((prev: any) => ({
-        ...prev,
-        height: ((e.clientY - initialMousePositionY) / window.innerHeight) * 100
+    if (mouse.isDown) {
+      setTimeCards(timeCards.map((card, idx) => {
+        if (idx === timeCards.length - 1) {
+          return {
+            ...card,
+            height: ((e.clientY - mouse.initialPositionY) / window.innerHeight) * 100,
+          };
+        }
+        return card;
       }));
     }
   }
-
-  const TimeCard = ({ timeCardProps }: { timeCardProps: timeCardProps | null }) => {
-    if (!timeCardProps) return <div className="absolute z-50" />;
-    const { top, left, width, height, timeStart, timeEnd } = timeCardProps;
-    return (
-      <div className="absolute z-50 border-purple-primary border-2 rounded-lg"
-        style={{
-          height: `${height}vh`,
-          width: `${width}vw`,
-          top: `${top}vh`,
-          left: `${left}vw`,
-        }}>
-        <header className="bg-purple-primary rounded-t-md flex flex-row items-center p-2 text-white font-mona text-[10px] tracking-widest">
-          <Image className="mr-2" src={bellIcon.src} width={20} height={20} alt="Notification" />
-          <span>{timeStart}</span>
-          <Image className="mx-2" src={whiteArrowIcon.src} width={20} height={30} alt="Arrow" />
-          <span>{timeEnd}</span>
-        </header>
-        <main className="rounded-b-md w-full h-auto p-2">
-          <div className="bg-purple-primary opacity-10"></div>
-          <span className="font-mona text-xs text-black">Math Class</span>
-          <Image className="origin-center rotate-90 absolute right-1 bottom-1 opacity-25 cursor-grab" src={dragDropIcon.src} width={10} height={10} alt="Drag and Drop" />
-        </main>
-      </div>
-    );
-  };
 
   return (
     <div className="col-span-12 row-span-9 overflow-y-auto grid grid-cols-12">
@@ -178,7 +161,6 @@ const TimeAndCells = () => {
       <div className="col-span-11">
         <div className="grid grid-cols-7 relative z-0 overflow-visible" id="cells-container"
           onMouseMove={(e) => handleOnMouseMove(e)} >
-          <TimeCard timeCardProps={timeCardProps} />
           {Array.from({ length: 7 }, (_, index) => <div key={index} className="pb-1" />)}
           {Array.from({ length: 336 }, (_, index) => {
             const dayIndex = index % 7;
@@ -197,21 +179,58 @@ const TimeAndCells = () => {
               />
             );
           })}
+          {timeCards.map((card, index) => (
+            <div key={index} className="absolute z-50 border-purple-primary border-2 rounded-lg flex flex-col"
+              style={{
+                height: `${card.height}vh`,
+                width: `${card.width}vw`,
+                top: `${card.top}vh`,
+                left: `${card.left}vw`,
+              }}>
+              {card.height >= 4 && (
+                <header className="bg-purple-primary rounded-t-md flex flex-row items-center p-2 text-white font-mona text-[10px] tracking-widest">
+                  <img className="mr-2" src={bellIcon.src} width={20} height={20} alt="Notification" />
+                  <span>{card.timeStart}</span>
+                  <img className="mx-2" src={whiteArrowIcon.src} width={20} height={30} alt="Arrow" />
+                  <span>{card.timeEnd === "" ? "..." : card.timeEnd}</span>
+                </header>
+              )}
+              <main className="grow rounded-b-md w-full p-2 bg-purple-primary bg-opacity-10" style={{ maxHeight: card.height >= 4 ? 'calc(100% - 20px)' : '100%' }}>
+                <span className="font-mona text-xs text-black">{card.name}</span>
+                <img className="origin-center rotate-90 absolute right-1 bottom-1 opacity-25 cursor-grab" src={dragDropIcon.src} width={10} height={10} alt="Drag and Drop" />
+              </main>
+            </div>
+          ))}
+
         </div>
       </div>
     </div>
   );
 };
 
-const Calendar = () => (
-  <>
+const settingsModal = () => {
+  return <div>
+
+  </div>
+}
+
+const Calendar = () => {
+  const tempCalendar: weeklyCalendar = {
+    name: "Monkey calendar",
+    timeCards: [],
+    timeStart: "7:00",
+  }
+  const [calendar, setCalendar] = useState<weeklyCalendar>(tempCalendar)
+
+  return <>
     <LayoutContainer>
-      <Header />
+      <Header  name={calendar.name}/>
       <Empty />
       <DaysRow />
-      <TimeAndCells />
+      <TimeAndCells calendar={calendar} setCalendar={setCalendar}/>
     </LayoutContainer>
   </>
-);
+};
+
 
 export default Calendar;
