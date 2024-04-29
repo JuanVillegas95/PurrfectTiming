@@ -1,5 +1,6 @@
+/* eslint-disable @next/next/no-img-element */
 "use client"; // Assuming this is an experimental directive or should be removed if it's incorrect.
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from "react";
 import { TimeCard } from "@/types/calendar";
 import { weeklyCalendar } from '@/types/calendar';
 
@@ -62,14 +63,14 @@ const calculateExactTime = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, cel
 };
 
 const LayoutContainer = ({ children }: { children: React.ReactNode }) => (
-  <div className="flex items-center justify-center h-screen">
+  <div className="flex items-center justify-center h-screen relative z-0">
     <div className="w-10/12 h-5/6 bg-white grid grid-cols-12 grid-rows-10 rounded-xl">
       {children}
     </div>
   </div>
 );
 
-const Header = ({name}: {name:string}) => {
+const Header = ({ name }: { name: string }) => {
   return (
     <div className="col-span-12 border-b font-mona text-xl p-6 ">
       <div className="flex flex-row items-center">
@@ -82,13 +83,13 @@ const Header = ({name}: {name:string}) => {
   );
 };
 
-const Empty = () => <div className="col-span-1"></div>;
+const Empty = () => <div className="col-span-1" />;
 
 const DaysRow = () => (
   <div className="col-span-11 row-span-1">
     <div className="grid grid-cols-7">
       {daysOfWeek.map((day, index) => (
-        <div key={index} className="flex items-center justify-center min-h-[50px] font-mona text-sm mt-4">
+        <div key={index} className="flex items-center justify-center min-h-[50px] font-mona text-sm mt-4 overflow-visible">
           {day}
         </div>
       ))}
@@ -96,20 +97,71 @@ const DaysRow = () => (
   </div>
 );
 
-const TimeAndCells = ({calendar, setCalendar} : {calendar: weeklyCalendar, setCalendar: React.Dispatch<React.SetStateAction<weeklyCalendar>>}) => {
+const TimeCardContextMenu = ({ card }: { card: TimeCard }) => {
+  return (
+    <div className="absolute z-50 bg-slate-600 w-40 h-40 rounded-lg" style={{ left: `${card.width + 1}vw`, top: '0' }}>
+      <div id="triangle"
+        className="
+        absolute
+        top-1 -left-3
+        w-0 h-0 
+        border-t-[10px] border-t-transparent
+        border-r-[15px] border-r-slate-600
+        border-b-[10px] border-b-transparent"
+      />
+    </div>
+  )
+}
+
+
+const TimeCard = ({ card, currentContextMenu }: { card: TimeCard, currentContextMenu: number }) => {
+  return (
+    <>
+      {card.height >= 2 && (
+        <div className="absolute z-40 border-purple-primary border-2 rounded-lg flex flex-col"
+          style={{
+            height: `${card.height}vh`,
+            width: `${card.width}vw`,
+            top: `${card.top}vh`,
+            left: `${card.left}vw`,
+          }}>
+          {card.height >= 4 && (
+            <header className="bg-purple-primary rounded-t-md flex flex-row items-center p-2 text-white font-mona text-[10px] tracking-widest">
+              <img className="mr-2" src={bellIcon.src} width={20} height={20} alt="Notification" />
+              <span>{card.timeStart}</span>
+              <img className="mx-2" src={whiteArrowIcon.src} width={20} height={30} alt="Arrow" />
+              <span>{card.timeEnd === "" ? "..." : card.timeEnd}</span>
+            </header>
+          )}
+          <main className="grow rounded-b-md w-full p-2 bg-purple-primary bg-opacity-10" style={{ maxHeight: card.height >= 4 ? 'calc(100% - 20px)' : '100%' }}>
+            <span className="font-mona text-xs text-black">{card.name}</span>
+            <img className="origin-center rotate-90 absolute right-1 bottom-1 opacity-25 cursor-grab" src={dragDropIcon.src} width={10} height={10} alt="Drag and Drop" />
+          </main>
+          {currentContextMenu == card.index && <TimeCardContextMenu card={card} />}
+        </div>
+      )}
+    </>
+  )
+}
+
+
+
+const TimeAndCells = ({ calendar, setCalendar }: { calendar: weeklyCalendar, setCalendar: React.Dispatch<React.SetStateAction<weeklyCalendar>> }) => {
 
   const [timeCards, setTimeCards] = useState<TimeCard[]>([]);
+  const [timeCardIndex, setTimeCardIndex] = useState<number>(0);
+  const [currentContextMenu, setCurrentContextMenu] = useState<number>(-1);
   const [mouse, setMouse] = useState({ isDown: false, initialPositionY: 0 });
   const hours = generateHours(calendar.timeStart);
   const timeCells = generateTimeCells(calendar.timeStart);
 
 
-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, cellTime: string) => {
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, cellTime: string, dayName: string) => {
     setMouse({ isDown: true, initialPositionY: e.clientY });
-
     const cellProps = e.currentTarget.getBoundingClientRect();
     const cellsContainerProps = (document.getElementById("cells-container") as HTMLDivElement).getBoundingClientRect();
     const newTimeCard: TimeCard = {
+      index: timeCardIndex,
       name: "",
       top: ((e.clientY - cellsContainerProps.top) / window.innerHeight) * 100,
       left: ((cellProps.left - cellsContainerProps.left) / window.innerWidth) * 100,
@@ -117,8 +169,13 @@ const TimeAndCells = ({calendar, setCalendar} : {calendar: weeklyCalendar, setCa
       height: 0,
       timeStart: calculateExactTime(e, cellTime),
       timeEnd: "",
+      day: dayName,
+      style: "gray",
     }
+
+    setTimeCardIndex(prev => prev + 1);
     setTimeCards([...timeCards, newTimeCard]);
+    setCurrentContextMenu(-1);
   }
 
   const handleMouseUp = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, cellTime: string) => {
@@ -133,6 +190,7 @@ const TimeAndCells = ({calendar, setCalendar} : {calendar: weeklyCalendar, setCa
       }
       return card;
     }));
+    setCurrentContextMenu(timeCards[timeCards.length - 1].index);
   }
 
   const handleOnMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
@@ -148,6 +206,12 @@ const TimeAndCells = ({calendar, setCalendar} : {calendar: weeklyCalendar, setCa
       }));
     }
   }
+
+  const handleContextMenu = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, cardIndex: number) => {
+    e.preventDefault();
+    setCurrentContextMenu(cardIndex);
+  }
+
 
   return (
     <div className="col-span-12 row-span-9 overflow-y-auto grid grid-cols-12">
@@ -175,44 +239,22 @@ const TimeAndCells = ({calendar, setCalendar} : {calendar: weeklyCalendar, setCa
                 className="border border-dashed border-gray-300 w-full h-8"
                 data-value={`${dayName} ${timeSlot}`}
                 onMouseUp={(e) => handleMouseUp(e, timeSlot)}
-                onMouseDown={(e) => handleMouseDown(e, timeSlot)}
+                onMouseDown={(e) => handleMouseDown(e, timeSlot, dayName)}
               />
             );
           })}
-          {timeCards.map((card, index) => (
-            <div key={index} className="absolute z-50 border-purple-primary border-2 rounded-lg flex flex-col"
-              style={{
-                height: `${card.height}vh`,
-                width: `${card.width}vw`,
-                top: `${card.top}vh`,
-                left: `${card.left}vw`,
-              }}>
-              {card.height >= 4 && (
-                <header className="bg-purple-primary rounded-t-md flex flex-row items-center p-2 text-white font-mona text-[10px] tracking-widest">
-                  <img className="mr-2" src={bellIcon.src} width={20} height={20} alt="Notification" />
-                  <span>{card.timeStart}</span>
-                  <img className="mx-2" src={whiteArrowIcon.src} width={20} height={30} alt="Arrow" />
-                  <span>{card.timeEnd === "" ? "..." : card.timeEnd}</span>
-                </header>
-              )}
-              <main className="grow rounded-b-md w-full p-2 bg-purple-primary bg-opacity-10" style={{ maxHeight: card.height >= 4 ? 'calc(100% - 20px)' : '100%' }}>
-                <span className="font-mona text-xs text-black">{card.name}</span>
-                <img className="origin-center rotate-90 absolute right-1 bottom-1 opacity-25 cursor-grab" src={dragDropIcon.src} width={10} height={10} alt="Drag and Drop" />
-              </main>
-            </div>
-          ))}
-
+          {timeCards.map((card, index) => {
+            return (
+              <div key={index} onContextMenu={(e) => handleContextMenu(e, card.index)}  >
+                <TimeCard card={card} currentContextMenu={currentContextMenu} />
+              </div>
+            )
+          })}
         </div>
       </div>
     </div>
   );
 };
-
-const settingsModal = () => {
-  return <div>
-
-  </div>
-}
 
 const Calendar = () => {
   const tempCalendar: weeklyCalendar = {
@@ -224,10 +266,10 @@ const Calendar = () => {
 
   return <>
     <LayoutContainer>
-      <Header  name={calendar.name}/>
+      <Header name={calendar.name} />
       <Empty />
       <DaysRow />
-      <TimeAndCells calendar={calendar} setCalendar={setCalendar}/>
+      <TimeAndCells calendar={calendar} setCalendar={setCalendar} />
     </LayoutContainer>
   </>
 };

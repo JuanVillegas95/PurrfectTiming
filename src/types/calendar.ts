@@ -1,4 +1,5 @@
 export interface TimeCard{
+  index: number,
   top: number,
   left: number,
   width: number,
@@ -6,6 +7,8 @@ export interface TimeCard{
   name: string,
   timeStart: string,
   timeEnd: string,
+  style: "gray" | "purple" | "blue"| "pink"| "orange",
+  day: string,
 }
 export interface weeklyCalendar{
   name: string,
