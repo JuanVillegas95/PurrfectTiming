@@ -115,31 +115,18 @@ const TimeCardContextMenu = ({ card }: { card: TimeCard }) => {
 
 
 const TimeCard = ({ card, currentContextMenu }: { card: TimeCard, currentContextMenu: number }) => {
+
   return (
     <>
-      {card.height >= 2 && (
-        <div className="absolute z-40 border-purple-primary border-2 rounded-lg flex flex-col"
-          style={{
-            height: `${card.height}vh`,
-            width: `${card.width}vw`,
-            top: `${card.top}vh`,
-            left: `${card.left}vw`,
-          }}>
-          {card.height >= 4 && (
-            <header className="bg-purple-primary rounded-t-md flex flex-row items-center p-2 text-white font-mona text-[10px] tracking-widest">
-              <img className="mr-2" src={bellIcon.src} width={20} height={20} alt="Notification" />
-              <span>{card.timeStart}</span>
-              <img className="mx-2" src={whiteArrowIcon.src} width={20} height={30} alt="Arrow" />
-              <span>{card.timeEnd === "" ? "..." : card.timeEnd}</span>
-            </header>
-          )}
-          <main className="grow rounded-b-md w-full p-2 bg-purple-primary bg-opacity-10" style={{ maxHeight: card.height >= 4 ? 'calc(100% - 20px)' : '100%' }}>
-            <span className="font-mona text-xs text-black">{card.name}</span>
-            <img className="origin-center rotate-90 absolute right-1 bottom-1 opacity-25 cursor-grab" src={dragDropIcon.src} width={10} height={10} alt="Drag and Drop" />
-          </main>
-          {currentContextMenu == card.index && <TimeCardContextMenu card={card} />}
-        </div>
-      )}
+      <div className="absolute z-40 border-purple-primary bg-purple-primary bg-opacity-10 border-2 rounded-lg flex flex-col"
+        style={{
+          height: `${card.height}vh`,
+          width: `${card.width}vw`,
+          top: `${card.top}vh`,
+          left: `${card.left}vw`,
+        }}>
+        {currentContextMenu == card.index && <TimeCardContextMenu card={card} />}
+      </div>
     </>
   )
 }
@@ -151,6 +138,7 @@ const TimeAndCells = ({ calendar, setCalendar }: { calendar: weeklyCalendar, set
   const [timeCards, setTimeCards] = useState<TimeCard[]>([]);
   const [timeCardIndex, setTimeCardIndex] = useState<number>(0);
   const [currentContextMenu, setCurrentContextMenu] = useState<number>(-1);
+  const [currentCardCollision, setCurrentCardCollision] = useState<boolean>(false);
   const [mouse, setMouse] = useState({ isDown: false, initialPositionY: 0 });
   const hours = generateHours(calendar.timeStart);
   const timeCells = generateTimeCells(calendar.timeStart);
@@ -163,9 +151,10 @@ const TimeAndCells = ({ calendar, setCalendar }: { calendar: weeklyCalendar, set
     const newTimeCard: TimeCard = {
       index: timeCardIndex,
       name: "",
+      initialPositionY : e.clientY,
       top: ((e.clientY - cellsContainerProps.top) / window.innerHeight) * 100,
-      left: ((cellProps.left - cellsContainerProps.left) / window.innerWidth) * 100,
-      width: (cellProps.width / window.innerWidth) * 100,
+      left: (((cellProps.left - cellsContainerProps.left) / window.innerWidth) + .001) * 100,
+      width: ((cellProps.width / window.innerWidth) - .001) * 100,
       height: 0,
       timeStart: calculateExactTime(e, cellTime),
       timeEnd: "",
@@ -193,19 +182,37 @@ const TimeAndCells = ({ calendar, setCalendar }: { calendar: weeklyCalendar, set
     setCurrentContextMenu(timeCards[timeCards.length - 1].index);
   }
 
-  const handleOnMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    if (mouse.isDown) {
-      setTimeCards(timeCards.map((card, idx) => {
-        if (idx === timeCards.length - 1) {
-          return {
-            ...card,
-            height: ((e.clientY - mouse.initialPositionY) / window.innerHeight) * 100,
-          };
+
+    const detectCollision = (currentCard: TimeCard, otherCards: TimeCard[]) => {
+      return otherCards.some(card => {
+        return currentCard !== card &&
+          currentCard.left < card.left + card.width &&
+          currentCard.left + currentCard.width > card.left &&
+          currentCard.top < card.top + card.height &&
+          currentCard.top + currentCard.height > card.top;
+      });
+    };
+    
+    const handleOnMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+      if (mouse.isDown) {
+        const newHeight = ((e.clientY - mouse.initialPositionY) / window.innerHeight) * 100;
+        const lastCard = timeCards[timeCards.length - 1];
+        const updatedCard = {
+          ...lastCard,
+          height: newHeight,
+        };
+        // Check if the new card would collide with any existing cards
+        if (!detectCollision(updatedCard, timeCards.slice(0, -1))) {
+          setTimeCards(timeCards.map((card, idx) => {
+            if (idx === timeCards.length - 1) {
+              return updatedCard;
+            }
+            return card;
+          }));
         }
-        return card;
-      }));
-    }
-  }
+      }
+    };
+
 
   const handleContextMenu = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, cardIndex: number) => {
     e.preventDefault();
@@ -234,6 +241,7 @@ const TimeAndCells = ({ calendar, setCalendar }: { calendar: weeklyCalendar, set
             const cellId = `${index}_${dayName}_${timeSlot}`;
             return (
               <div
+                title="cell"
                 key={index}
                 id={cellId}
                 className="border border-dashed border-gray-300 w-full h-8"

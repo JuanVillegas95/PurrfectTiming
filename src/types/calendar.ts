@@ -1,5 +1,6 @@
 export interface TimeCard{
   index: number,
+  initialPositionY: number,
   top: number,
   left: number,
   width: number,
