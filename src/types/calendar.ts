@@ -8,8 +8,8 @@ export interface TimeCard{
   name: string,
   timeStart: string,
   timeEnd: string,
-  style: "gray" | "purple" | "blue"| "pink"| "orange",
   day: string,
+  style: React.CSSProperties
 }
 export interface weeklyCalendar{
   name: string,

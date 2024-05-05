@@ -1,8 +1,32 @@
 /* eslint-disable @next/next/no-img-element */
-"use client"; // Assuming this is an experimental directive or should be removed if it's incorrect.
+"use client"; 
 import React, { useState, useEffect, useRef } from "react";
 import { TimeCard } from "@/types/calendar";
 import { weeklyCalendar } from '@/types/calendar';
+
+import {
+  purple,
+  purpleWithOpacity,
+  blue,
+  blueWithOpacity,
+  pink,
+  pinkWithOpacity,
+  orange,
+  orangeWithOpacity,
+  red,
+  redWithOpacity,
+  green,
+  greenWithOpacity,
+  gray,
+  grayWithOpacity,
+  grayStyle,
+  purpleStyle,
+  blueStyle,
+  pinkStyle,
+  orangeStyle,
+  redStyle,
+  greenStyle
+} from './utils/colors'
 
 import settingsIcon from "@/images/settings-icon.png";
 import editIcon from "@/images/editIcon.png";
@@ -115,21 +139,23 @@ const TimeCardContextMenu = ({ card }: { card: TimeCard }) => {
 
 
 const TimeCard = ({ card, currentContextMenu }: { card: TimeCard, currentContextMenu: number }) => {
-
   return (
     <>
-      <div className="absolute z-40 border-purple-primary bg-purple-primary bg-opacity-10 border-2 rounded-lg flex flex-col"
+      <div className={`absolute z-40 border-2 rounded-lg flex flex-col`}
         style={{
           height: `${card.height}vh`,
           width: `${card.width}vw`,
           top: `${card.top}vh`,
           left: `${card.left}vw`,
+          ...card.style
         }}>
-        {currentContextMenu == card.index && <TimeCardContextMenu card={card} />}
+          <h1>{card.timeStart} - {card.timeEnd}</h1>
+        {/* {currentContextMenu == card.index && <TimeCardContextMenu card={card} />} */}
       </div>
     </>
   )
 }
+
 
 
 
@@ -142,7 +168,7 @@ const TimeAndCells = ({ calendar, setCalendar }: { calendar: weeklyCalendar, set
   const [mouse, setMouse] = useState({ isDown: false, initialPositionY: 0 });
   const hours = generateHours(calendar.timeStart);
   const timeCells = generateTimeCells(calendar.timeStart);
-
+  const heightForFifteenMinutes = (15 * 32) / 30;
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, cellTime: string, dayName: string) => {
     setMouse({ isDown: true, initialPositionY: e.clientY });
@@ -159,7 +185,7 @@ const TimeAndCells = ({ calendar, setCalendar }: { calendar: weeklyCalendar, set
       timeStart: calculateExactTime(e, cellTime),
       timeEnd: "",
       day: dayName,
-      style: "gray",
+      style: redStyle,
     }
 
     setTimeCardIndex(prev => prev + 1);
@@ -196,11 +222,16 @@ const TimeAndCells = ({ calendar, setCalendar }: { calendar: weeklyCalendar, set
     const handleOnMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
       if (mouse.isDown) {
         const newHeight = ((e.clientY - mouse.initialPositionY) / window.innerHeight) * 100;
+
+        // const newStyle: React.CSSProperties = newHeight <  (2.0833 / 2 )? redStyle : grayStyle;
+
         const lastCard = timeCards[timeCards.length - 1];
         const updatedCard = {
           ...lastCard,
+          // style: newStyle,
           height: newHeight,
         };
+
         // Check if the new card would collide with any existing cards
         if (!detectCollision(updatedCard, timeCards.slice(0, -1))) {
           setTimeCards(timeCards.map((card, idx) => {

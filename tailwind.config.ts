@@ -10,24 +10,25 @@ const config: Config = {
     extend: {
       colors: {
         purple: {
-          primary: '#571BFB',   // matches --primary-purple
-          secondary: '#ECEBFF', // matches --secondary-purple
-          tertiary: '#B198FF'   // matches --tertiary-purple
+          DEFAULT: '#571BFB', // Using DEFAULT for the base color
         },
         blue: {
-          primary: '#01A2EA',   // matches --primary-blue
-          secondary: '#F1FAFD', // matches --secondary-blue
-          tertiary: '#DAF5FC'   // matches --tertiary-blue
+          DEFAULT: '#01A2EA',
         },
         pink: {
-          primary: '#FE3CBB',   // matches --primary-pink
-          secondary: '#FDECF9', // matches --secondary-pink
-          tertiary: '#FCD8EF'   // matches --tertiary-pink
+          DEFAULT: '#FE3CBB',
         },
         orange: {
-          primary: '#FF7E00',   // matches --primary-orange
-          secondary: '#FEF3F0', // matches --secondary-orange
-          tertiary: '#FFE9DC'   // matches --tertiary-orange
+          DEFAULT: '#FF7E00',
+        },
+        red: {
+          DEFAULT: '#FF0000',
+        },
+        green: {
+          DEFAULT: '#008000',
+        },
+        gray: {
+          DEFAULT: '#333333',
         }
       },
       fontFamily: {
@@ -37,4 +38,5 @@ const config: Config = {
   },
   plugins: [],
 };
+
 export default config;
