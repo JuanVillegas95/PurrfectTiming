@@ -3,7 +3,10 @@
 > **Note:** This project is currently under development in a private repository. Below are some visual updates of the current progress.
 <img width="1404" alt="image" src="https://github.com/user-attachments/assets/e9b92863-b8b8-4666-9654-44b00e618531">
 
-![Description of the GIF](https://github.com/user-attachments/assets/fe445245-9e92-43a0-9ef4-f5a1fe6947c8)
+
+[Watch the video](https://github.com/user-attachments/assets/ce15310b-f25f-499e-a412-8ec8c0463397)
+
+
 
 
 Welcome to PurrfectTiming, a unique scheduling application designed to bridge time zones and schedules, no matter where they are in the world. Born from a simple need to better synchronize weekly schedules between an individual in Mexico and their partner in the Slovenia, PurrfectTiming is here to help you find those perfect moments to connect across any distance.
